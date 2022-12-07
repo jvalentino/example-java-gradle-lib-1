@@ -4,6 +4,13 @@
 
 The purpose of this project is to be a basic Java library that is built using Gradle, with the intention of adding to it common software utilities step by step.
 
+Prerequisites
+
+- Git Setup: https://github.com/jvalentino/setup-git
+- Building Java 101: https://github.com/jvalentino/java-building-101
+
+## Building it
+
 The important step here, is how to run the build which includes any associated testing, other automation, and ultimatley builds the jar file:
 
 ```bash
@@ -26,7 +33,78 @@ BUILD SUCCESSFUL in 919ms
 5 actionable tasks: 5 executed
 ```
 
+Specifically, you get this output:
 
+![01](./wiki/01.png)
+
+lib/build/lib.jar is the underlying java library that was build, while the index.html file is a detailed report on all the unit testing:
+
+![01](./wiki/02.png)
+
+## Wait, how does all this work?
+
+Gradle.
+
+Specifically Gradle is a technology that works on the principal of "convention over configuration", which is a basic way of saying for anything you are building/deliverying there is an assumed convention, and as such you should only have to declare code for when you deviate from that convention.
+
+Well mostly, as there is some boiletplate stuff you still have to declare.
+
+### settings.gradle
+
+```groovy
+rootProject.name = 'example-java-gradle-lib-1'
+include('lib')
+```
+
+The purpose of this file is give a name for the underlying project, and to specify the different source code directories that represent what is being build. In the case that we are building just a library, it has its own specific build setting in the lib directory, so that is what we include.
+
+**Sidebar on Multi-Project**
+
+This means that multi-directoy/muti-thing projects are supported by default, however I will strongly caution you from using them. If you make a project consists of two libraries, both of those libraries are tightly coupled together, which defeats the purpose of having them separate in the first place. Having a multi-project repository is sometimes a good first step, when figuring out how to bring something up. However, the next step is to take what you broke it and put it in its own library/app.
+
+### lib/build.gradle
+
+This is where the real magic happens:
+
+```groovy
+plugins {
+    // Apply the java-library plugin for API and implementation separation.
+    id 'java-library'
+}
+
+repositories {
+    // Use Maven Central for resolving dependencies.
+    mavenCentral()
+}
+
+dependencies {
+    // Use JUnit Jupiter for testing.
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
+
+    // This dependency is exported to consumers, that is to say found on their compile classpath.
+    api 'org.apache.commons:commons-math3:3.6.1'
+
+    // This dependency is used internally, and not exposed to consumers on their own compile classpath.
+    implementation 'com.google.guava:guava:31.1-jre'
+}
+
+tasks.named('test') {
+    // Use JUnit Platform for unit tests.
+    useJUnitPlatform()
+}
+```
+
+At the top we are applying an existing core plugin called `java-libary`. By including this plugin, we immediately inherit an entire build lifecycle for building a reusable Java library. That is where all those tasks came from in the start where we ran `./gradlew build`.
+
+The `repositories` section is used for declating the remote location that contain the dependencies you need, later declared in the `dependencies` section.
+
+The `dependencies` seciton is where you refer to the libraries you want to use to build what you are building. For the moment the 3 important types of dependencies are:
+
+- testImplementation - Means that something is needed for executing test classes, and is therefore not needed in the actual running of the application
+- implementation - This dependency is used internally, and not exposed to consumers on their own compile classpath.
+- api - This dependency is exported to consumers, that is to say found on their compile classpath.
+
+The final section stating `tasks.named('test')`, is override the behavior of all tests that are named test to use the JUNit testing platform.
 
 # FAQ
 
