@@ -9,6 +9,12 @@ Prerequisites
 - Git Setup: https://github.com/jvalentino/setup-git
 - Building Java 101: https://github.com/jvalentino/java-building-101
 
+## Java-Gradle 101
+
+![](https://docs.gradle.org/current/userguide/img/javaPluginTasks.png)
+
+Reference: https://docs.gradle.org/current/userguide/java_plugin.html
+
 ## Building it
 
 The important step here, is how to run the build which includes any associated testing, other automation, and ultimatley builds the jar file:
